@@ -40,8 +40,11 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Teachable Machine / TF.js models live in frontend/public/models/ and are served by Vite (dev)
 // or your static host / CDN — not Express. Do not point the React app at :5000 for model files.
 
-// Database connection
-connectDB();
+// Initialize database connection (non-blocking)
+let dbConnected = false;
+connectDB().then(result => {
+  dbConnected = result;
+});
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -50,7 +53,12 @@ app.use('/api/mission-captures', missionCaptureRoutes);
 
 // Basic route
 app.get('/', (req, res) => {
-  res.json({ message: 'SwachhMitra Backend API is running!' });
+  res.json({ 
+    message: 'SwachhMitra Backend API is running!',
+    status: 'online',
+    dbConnected: dbConnected ? 'Yes ✓' : 'No ✗ (check logs)',
+    timestamp: new Date().toISOString()
+  });
 });
 
 // Debug route
@@ -60,7 +68,17 @@ app.get('/debug', (req, res) => {
     timestamp: new Date().toISOString(),
     environment: {
       NODE_ENV: process.env.NODE_ENV,
-      PORT: process.env.PORT
+      PORT: process.env.PORT,
+      MONGO_URI_SET: !!process.env.MONGO_URI,
+      JWT_SECRET_SET: !!process.env.JWT_SECRET,
+      DB_CONNECTED: dbConnected
+    },
+    routes: {
+      'POST /api/auth/register': 'Register new user',
+      'POST /api/auth/login': 'Login user',
+      'GET /api/auth/profile': 'Get user profile (requires token)',
+      'POST /api/complaints': 'Submit complaint',
+      'GET /api/mission-captures': 'Get mission captures'
     }
   });
 });
