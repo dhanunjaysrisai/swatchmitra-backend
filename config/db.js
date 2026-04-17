@@ -12,15 +12,19 @@ const connectDB = async () => {
     const conn = await mongoose.connect(process.env.MONGO_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 10000,
+      socketTimeoutMS: 45000,
     });
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
+    console.log(`✓ MongoDB Connected: ${conn.connection.host}`);
+    return true;
   } catch (error) {
-    console.error('Database connection error:', error);
+    console.error('✗ Database connection error:', error.message);
     console.log('\n🔧 Troubleshooting:');
-    console.log('1. Make sure MongoDB is running locally on port 27017');
-    console.log('2. Or update MONGO_URI in .env to use MongoDB Atlas');
-    console.log('3. Check if .env file is in the backend directory');
-    process.exit(1);
+    console.log('1. Verify MONGO_URI in .env has correct password');
+    console.log('2. Check MongoDB Atlas network access settings (allow 0.0.0.0/0)');
+    console.log('3. Verify MONGO_URI format: mongodb+srv://user:password@cluster.mongodb.net/dbname');
+    console.log('\n⚠️ Backend will start but DB operations will fail until connection is fixed\n');
+    return false;
   }
 };
 
