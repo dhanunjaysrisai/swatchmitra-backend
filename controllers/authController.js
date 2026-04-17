@@ -13,6 +13,14 @@ const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
+    // Validate input
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide name, email, and password'
+      });
+    }
+
     // Check if user already exists
     const userExists = await User.findOne({ email });
     if (userExists) {
@@ -47,10 +55,27 @@ const registerUser = async (req, res) => {
       });
     }
   } catch (error) {
-    console.error('Registration error:', error);
+    console.error('Registration error:', error.message);
+    
+    // Handle specific MongoDB errors
+    if (error.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email already registered'
+      });
+    }
+    
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({
+        success: false,
+        message: Object.values(error.errors).map(e => e.message).join(', ')
+      });
+    }
+    
     res.status(500).json({
       success: false,
-      message: 'Server error during registration'
+      message: 'Server error during registration',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 };
