@@ -19,10 +19,19 @@ const app = express();
 // Middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-// Reflect request origin so LAN/mobile dev works (e.g. http://192.168.x.x:5173 → API on :5000)
+// CORS configuration - allow frontend and local dev
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'https://swatchmitra-frontend.onrender.com',
+  /localhost/,
+  /\.onrender\.com$/
+];
 app.use(cors({
-  origin: true,
-  credentials: true
+  origin: allowedOrigins,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 // Serve static files from uploads directory
@@ -53,6 +62,20 @@ app.get('/debug', (req, res) => {
       NODE_ENV: process.env.NODE_ENV,
       PORT: process.env.PORT
     }
+  });
+});
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({ error: 'Route not found', path: req.path, method: req.method });
+});
+
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error('Error:', err);
+  res.status(err.status || 500).json({ 
+    error: err.message || 'Internal server error',
+    path: req.path 
   });
 });
 
