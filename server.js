@@ -80,6 +80,7 @@ app.get('/debug', (req, res) => {
       'POST /api/auth/login': 'Login user',
       'GET /api/auth/profile': 'Get user profile (requires token)',
       'POST /api/complaints': 'Submit complaint',
+      'GET /api/mission/health': 'Mission router health (no auth)',
       'POST /api/mission/captures': 'Save mission capture (image + metadata)',
       'GET /api/mission-captures': 'Get mission captures'
     }
