@@ -7,11 +7,17 @@ const {
   createMissionCapture,
 } = require('../controllers/missionCaptureController');
 
-/** Smoke test for deploy / routing (no auth). */
+const captureHandlers = [auth, upload.single('image'), handleMulterError, createMissionCapture];
+
+/** Smoke test (no auth). Same router is mounted at /api/mission and /api/mission-captures in server.js */
 router.get('/health', (req, res) => {
-  res.json({ ok: true, router: 'mission' });
+  res.json({ ok: true, router: 'missionCapture' });
 });
 
-router.post('/captures', auth, upload.single('image'), handleMulterError, createMissionCapture);
+/** Frontend uses POST /api/mission/captures */
+router.post('/captures', ...captureHandlers);
+
+/** Legacy: POST /api/mission-captures */
+router.post('/', ...captureHandlers);
 
 module.exports = router;
