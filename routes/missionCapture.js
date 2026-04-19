@@ -7,6 +7,6 @@ const {
   createMissionCapture,
 } = require('../controllers/missionCaptureController');
 
-router.post('/', auth, upload.single('image'), handleMulterError, createMissionCapture);
+router.post('/captures', auth, upload.single('image'), handleMulterError, createMissionCapture);
 
 module.exports = router;
