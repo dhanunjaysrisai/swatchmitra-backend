@@ -94,9 +94,22 @@ const createMissionCapture = async (req, res) => {
       }
     }
 
+    // Validate dustbin detection
+    const pct = confidencePercent != null ? Number(confidencePercent) : 0;
+    if (label !== 'dustbin' || pct < 60) {
+      try {
+        fs.unlinkSync(req.file.path);
+      } catch {
+        // no-op
+      }
+      return res.status(400).json({
+        success: false,
+        message: 'Please capture a valid image with a dustbin.',
+      });
+    }
+
     const imagePath = `/uploads/missions/${path.basename(req.file.path)}`;
 
-    const pct = confidencePercent != null ? Number(confidencePercent) : 0;
     const pts = points != null ? Number(points) : 0;
 
     await MissionCapture.create({
