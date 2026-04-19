@@ -13,7 +13,6 @@ const connectDB = require('./config/db');
 const authRoutes = require('./routes/auth');
 const complaintRoutes = require('./routes/complaints');
 const missionCaptureRoutes = require('./routes/missionCapture');
-const missionRoutes = require('./routes/mission');
 
 const app = express();
 
@@ -50,7 +49,8 @@ connectDB().then(result => {
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/complaints', complaintRoutes);
-app.use('/api/mission', missionRoutes);
+// Same router: /api/mission/captures (frontend) and /api/mission-captures (legacy POST /)
+app.use('/api/mission', missionCaptureRoutes);
 app.use('/api/mission-captures', missionCaptureRoutes);
 
 // Basic route
@@ -80,9 +80,10 @@ app.get('/debug', (req, res) => {
       'POST /api/auth/login': 'Login user',
       'GET /api/auth/profile': 'Get user profile (requires token)',
       'POST /api/complaints': 'Submit complaint',
-      'GET /api/mission/health': 'Mission router health (no auth)',
+      'GET /api/mission/health': 'Mission capture router health (no auth)',
       'POST /api/mission/captures': 'Save mission capture (image + metadata)',
-      'GET /api/mission-captures': 'Get mission captures'
+      'POST /api/mission-captures': 'Save mission capture (legacy path)',
+      'GET /api/mission-captures/health': 'Same health under legacy mount'
     }
   });
 });
